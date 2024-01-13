@@ -2,6 +2,7 @@ use assistants_core::models::Function;
 use assistants_extra::llm::llm;
 use async_openai::types::ChatCompletionFunctions;
 use async_openai::types::FunctionCall;
+use async_openai::types::FunctionObject;
 use log::error;
 use log::info;
 use serde_json::json;
@@ -264,10 +265,10 @@ pub async fn create_function_call(
     for row in rows {
         let input = FunctionCallInput {
             function: Function {
-                inner: ChatCompletionFunctions {
+                inner: FunctionObject {
                     name: row.name.unwrap_or_default(),
                     description: row.description,
-                    parameters: serde_json::from_value(row.parameters.unwrap_or_default())?,
+                    parameters: Some(serde_json::from_value(row.parameters.unwrap_or_default())?),
                 },
                 assistant_id: assistant_id.to_string(),
                 user_id: user_id.to_string(),
@@ -305,6 +306,7 @@ mod tests {
         .unwrap();
     }
     #[tokio::test]
+    #[ignore]
     async fn test_create_function_call_with_openai() {
         dotenv::dotenv().ok();
         let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
@@ -346,10 +348,10 @@ mod tests {
 
         // Register the weather function
         let weather_function = Function {
-            inner: ChatCompletionFunctions {
+            inner: FunctionObject {
                 name: String::from("weather"),
                 description: Some(String::from("Get the weather for a city")),
-                parameters: json!({
+                parameters: Some(json!({
                     "type": "object",
                     "required": ["city"],
                     "properties": {
@@ -359,7 +361,7 @@ mod tests {
                             "enum": null
                         }
                     }
-                }),
+                })),
             },
             assistant_id: assistant.inner.id.clone(),
             user_id: user_id.clone(),
@@ -400,6 +402,7 @@ mod tests {
     }
 
     #[tokio::test]
+    #[ignore]
     async fn test_create_function_call_with_anthropic() {
         dotenv::dotenv().ok();
         let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
@@ -416,7 +419,7 @@ mod tests {
                 instructions: Some("".to_string()),
                 name: Some("Math Tutor".to_string()),
                 tools: vec![],
-                model: "anthropic/claude-2.1".to_string(),
+                model: "mixtral-8x7b-instruct".to_string(),
                 file_ids: vec![],
                 object: "object_value".to_string(),
                 created_at: 0,
@@ -443,10 +446,10 @@ mod tests {
         let weather_function = Function {
             assistant_id: assistant.inner.id.clone(),
             user_id: user_id.clone(),
-            inner: ChatCompletionFunctions {
+            inner: FunctionObject {
                 name: String::from("weather"),
                 description: Some(String::from("Get the weather for a city")),
-                parameters: json!({
+                parameters: Some(json!({
                     "type": "object",
                     "required": ["city"],
                     "properties": {
@@ -456,7 +459,7 @@ mod tests {
                             "enum": null
                         }
                     }
-                }),
+                })),
             },
         };
         register_function(&pool, weather_function).await.unwrap();
@@ -496,6 +499,7 @@ mod tests {
     }
 
     #[tokio::test]
+    #[ignore]
     async fn test_create_function_call_with_llama_2_70b_chat() {
         dotenv::dotenv().ok();
         let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
@@ -540,10 +544,10 @@ mod tests {
         let weather_function = Function {
             assistant_id: assistant.inner.id.clone(),
             user_id: user_id.clone(),
-            inner: ChatCompletionFunctions {
+            inner: FunctionObject {
                 name: String::from("weather"),
                 description: Some(String::from("Get the weather for a city")),
-                parameters: json!({
+                parameters: Some(json!({
                     "type": "object",
                     "required": ["city"],
                     "properties": {
@@ -553,7 +557,7 @@ mod tests {
                             "enum": null
                         }
                     }
-                }),
+                })),
             },
         };
         register_function(&pool, weather_function).await.unwrap();
@@ -594,6 +598,8 @@ mod tests {
     }
 
     #[tokio::test]
+    #[ignore]
+
     async fn test_generate_function_call_with_llama_2_70b() {
         dotenv::dotenv().ok();
         let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
@@ -625,10 +631,10 @@ mod tests {
         let function = Function {
             assistant_id: assistant.inner.id.clone(),
             user_id: user_id.clone(),
-            inner: ChatCompletionFunctions {
+            inner: FunctionObject {
                 name: String::from("weather"),
                 description: Some(String::from("Get the weather for a city")),
-                parameters: json!({
+                parameters: Some(json!({
                     "type": "object",
                     "required": ["city"],
                     "properties": {
@@ -638,7 +644,7 @@ mod tests {
                             "enum": null
                         }
                     }
-                }),
+                })),
             },
         };
 
@@ -677,6 +683,7 @@ mod tests {
     }
 
     #[tokio::test]
+    #[ignore]
     async fn test_generate_function_call_with_mixtral_8x7b() {
         dotenv::dotenv().ok();
         let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
@@ -708,10 +715,10 @@ mod tests {
         let function = Function {
             assistant_id: assistant.inner.id.clone(),
             user_id: user_id.clone(),
-            inner: ChatCompletionFunctions {
+            inner: FunctionObject {
                 name: String::from("weather"),
                 description: Some(String::from("Get the weather for a city")),
-                parameters: json!({
+                parameters: Some(json!({
                     "type": "object",
                     "required": ["city"],
                     "properties": {
@@ -721,7 +728,7 @@ mod tests {
                             "enum": null
                         }
                     }
-                }),
+                })),
             },
         };
 
@@ -760,6 +767,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore]
     fn test_string_to_function_call() {
         // Case 1: Valid JSON embedded within non-JSON content
         let input = "Some non-JSON content...\

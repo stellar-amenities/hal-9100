@@ -1,7 +1,7 @@
 use assistants_extra::anthropic;
 use async_openai::types::{
-    AssistantObject, ChatCompletionFunctions, MessageObject, MessageRole, RunObject, RunStatus,
-    ThreadObject,
+    AssistantObject, ChatCompletionFunctions, FunctionObject, MessageObject, MessageRole,
+    RunObject, RunStatus, ThreadObject,
 };
 use redis::RedisError;
 use serde::{self, Deserialize, Serialize};
@@ -84,7 +84,7 @@ impl From<assistants_core::models::Message> for async_openai::types::MessageObje
     }
 }
 
-#[derive(Debug, sqlx::FromRow, Serialize, Deserialize)]
+#[derive(Debug, sqlx::FromRow, Serialize, Deserialize, Clone)]
 pub struct Run {
     pub inner: RunObject,
     pub user_id: String,
@@ -139,7 +139,7 @@ impl Default for Assistant {
                 created_at: 0,
                 name: None,
                 description: None,
-                model: "claude-2.1".to_string(), // TODO everything should default to open source llm in the future when the repo is more stable
+                model: "mixtral-8x7b-instruct".to_string(), // TODO everything should default to open source llm in the future when the repo is more stable
                 instructions: Some("You are a helpful assistant.".to_string()),
                 tools: Vec::new(),
                 file_ids: Vec::new(),
@@ -162,7 +162,7 @@ pub struct SubmittedToolCall {
 
 #[derive(Debug, sqlx::FromRow, Serialize, Deserialize, Clone)]
 pub struct Function {
-    pub inner: ChatCompletionFunctions,
+    pub inner: FunctionObject,
     pub assistant_id: String,
     pub user_id: String,
 }
@@ -193,4 +193,49 @@ pub struct PartialChunk {
     pub data: String,
     pub start_index: i32,
     pub end_index: i32,
+}
+
+// -- internal logic
+
+pub struct RunError {
+    pub message: String,
+    pub run_id: String,
+    pub thread_id: String,
+    pub user_id: String,
+}
+
+impl std::fmt::Display for RunError {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "{}", self.message)
+    }
+}
+
+impl std::fmt::Debug for RunError {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "{}", self)
+    }
+}
+
+impl std::error::Error for RunError {}
+
+// Define an enum for the type of LLMAction based on the provided context
+#[derive(Debug, Serialize, Deserialize)]
+pub enum LLMActionType {
+    #[serde(rename = "steps")]
+    Steps,
+    #[serde(rename = "function_calling")]
+    FunctionCalling,
+    #[serde(rename = "code_interpreter")]
+    CodeInterpreter,
+    #[serde(rename = "retrieval")]
+    Retrieval,
+    Unknown,
+    // Add additional action types as needed
+}
+
+// Update the LLMAction struct to use the LLMActionType enum
+#[derive(Debug, Serialize, Deserialize)]
+pub struct LLMAction {
+    pub r#type: LLMActionType,
+    pub content: String,
 }

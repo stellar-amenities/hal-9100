@@ -2,7 +2,6 @@ use assistants_api_communication::assistants::{
     create_assistant_handler, delete_assistant_handler, get_assistant_handler,
     list_assistants_handler, update_assistant_handler,
 };
-use assistants_api_communication::chat::chat_handler;
 use assistants_api_communication::files::upload_file_handler;
 use assistants_api_communication::messages::{
     add_message_handler, delete_message_handler, get_message_handler, list_messages_handler,
@@ -178,7 +177,7 @@ fn app(app_state: AppState) -> Router {
         // .route("/threads/:thread_id/runs/:run_id/steps", get(list_run_steps_handler))
         // https://platform.openai.com/docs/api-reference/files
         .route("/files", post(upload_file_handler))
-        .route("/chat/completions", post(chat_handler))
+        // .route("/chat/completions", post(chat_handler))
         .route("/health", get(health_handler)) // new health check route
         .layer(DefaultBodyLimit::disable())
         .layer(RequestBodyLimitLayer::new(250 * 1024 * 1024)) // 250mb
@@ -209,9 +208,9 @@ mod tests {
     use async_openai::types::{
         AssistantObject, AssistantTools, AssistantToolsCode, AssistantToolsFunction,
         AssistantToolsRetrieval, ChatCompletionFunctions, CreateAssistantRequest,
-        CreateMessageRequest, ListMessagesResponse, MessageContent, MessageObject, MessageRole,
-        ModifyAssistantRequest, ModifyMessageRequest, ModifyThreadRequest, RunObject, RunStatus,
-        ThreadObject,
+        CreateMessageRequest, FunctionObject, ListMessagesResponse, MessageContent, MessageObject,
+        MessageRole, ModifyAssistantRequest, ModifyMessageRequest, ModifyThreadRequest, RunObject,
+        RunStatus, ThreadObject,
     };
     use axum::{
         body::Body,
@@ -405,7 +404,7 @@ mod tests {
             tools: Some(vec![AssistantTools::Code(AssistantToolsCode {
                 r#type: "code_interpreter".to_string(),
             })]),
-            model: "updated test".to_string(),
+            model: Some("updated test".to_string()),
             file_ids: None,
             description: None,
             metadata: None,
@@ -1152,7 +1151,7 @@ mod tests {
             tools: Some(vec![AssistantTools::Retrieval(AssistantToolsRetrieval {
                 r#type: "retrieval".to_string(),
             })]),
-            model: "claude-2.1".to_string(),
+            model: "mixtral-8x7b-instruct".to_string(),
             file_ids: Some(vec![file_id]), // Associate the uploaded file with the assistant
             description: None,
             metadata: None,
@@ -1808,7 +1807,7 @@ mod tests {
                     "type": "retrieval"
                 }
             ],
-            "model": "claude-2.1",
+            "model": "mixtral-8x7b-instruct",
             "file_ids": [file_id], // Associate the uploaded file with the assistant
         });
         let response = app
@@ -2057,7 +2056,7 @@ mod tests {
                     "type": "code_interpreter"
                 }
             ],
-            "model": "mistralai/mixtral-8x7b-instruct",
+            "model": "mixtral-8x7b-instruct",
             "file_ids": [file_id]
         });
 
@@ -2255,15 +2254,15 @@ mod tests {
             name: Some("Test".to_string()),
             tools: Some(vec![AssistantTools::Function(AssistantToolsFunction {
                 r#type: "function".to_string(),
-                function: ChatCompletionFunctions {
+                function: FunctionObject {
                     description: Some("A test function.".to_string()),
                     name: "test_a".to_string(),
-                    parameters: json!({
+                    parameters: Some(json!({
                         "type": "object",
-                    }),
+                    })),
                 },
             })]),
-            model: "mistralai/mixtral-8x7b-instruct".to_string(),
+            model: "mixtral-8x7b-instruct".to_string(),
             file_ids: None,
             description: None,
             metadata: None,
@@ -2274,15 +2273,15 @@ mod tests {
             name: Some("Test".to_string()),
             tools: Some(vec![AssistantTools::Function(AssistantToolsFunction {
                 r#type: "function".to_string(),
-                function: ChatCompletionFunctions {
+                function: FunctionObject {
                     description: Some("A test function.".to_string()),
                     name: "test_b".to_string(),
-                    parameters: json!({
+                    parameters: Some(json!({
                         "type": "object",
-                    }),
+                    })),
                 },
             })]),
-            model: "mistralai/mixtral-8x7b-instruct".to_string(),
+            model: "mixtral-8x7b-instruct".to_string(),
             file_ids: None,
             description: None,
             metadata: None,

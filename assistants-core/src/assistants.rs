@@ -359,7 +359,8 @@ mod tests {
     use super::*;
     use async_openai::types::{
         AssistantObject, AssistantToolsCode, AssistantToolsFunction, AssistantToolsRetrieval,
-        ChatCompletionFunctions, FunctionCall, RunToolCallObject, SubmitToolOutputs,
+        ChatCompletionFunctions, FunctionCall, FunctionObject, RunToolCallObject,
+        SubmitToolOutputs,
     };
     use dotenv::dotenv;
     use serde_json::json;
@@ -413,7 +414,7 @@ mod tests {
                 tools: vec![AssistantTools::Code(AssistantToolsCode {
                     r#type: "code_interpreter".to_string(),
                 })],
-                model: "claude-2.1".to_string(),
+                model: "mixtral-8x7b-instruct".to_string(),
                 file_ids: vec![],
                 object: "object_value".to_string(),
                 created_at: 0,
@@ -438,19 +439,19 @@ mod tests {
                 tools: vec![
                     AssistantTools::Function(AssistantToolsFunction {
                         r#type: "function".to_string(),
-                        function: ChatCompletionFunctions {
+                        function: FunctionObject {
                             description: Some("A function that compute the purpose of life according to the fundamental laws of the universe.".to_string()),
                             name: "compute_purpose_of_life".to_string(),
-                            parameters: json!({
+                            parameters: Some(json!({
                                 "type": "object",
-                            }),
+                            })),
                         },
                     }),
                     AssistantTools::Retrieval(AssistantToolsRetrieval {
                         r#type: "retrieval".to_string(),
                     }),
                 ],
-                model: "claude-2.1".to_string(),
+                model: "mixtral-8x7b-instruct".to_string(),
                 file_ids: vec![],
                 object: "object_value".to_string(),
                 created_at: 0,
@@ -494,7 +495,7 @@ mod tests {
             }
             _ => panic!("Wrong type"),
         }
-        assert_eq!(assistant.inner.model, "claude-2.1".to_string());
+        assert_eq!(assistant.inner.model, "mixtral-8x7b-instruct".to_string());
         assert_eq!(assistant.inner.file_ids.len(), 0);
     }
 }
