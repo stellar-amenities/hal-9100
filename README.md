@@ -1,4 +1,3 @@
-
 <p align="center">
 <img width="600" alt="hal-9100" src="https://github.com/stellar-amenities/hal-9100/assets/25003283/375a1e31-cf39-4592-8f5c-b37df119ebd7">
   <h1 align="center">🤖 HAL-9100</h1>
@@ -114,6 +113,7 @@ A minimal number of hard-coded prompts and behaviors, a wide range of models, in
 Get started in less than a minute through GitHub Codespaces:
 
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/stellar-amenities/hal-9100?quickstart=1)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fstellar-amenities%2Fhal-9100.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fstellar-amenities%2Fhal-9100?ref=badge_shield)
 
 Or:
 
@@ -200,3 +200,7 @@ We recommend switching to the Assistants API for a more streamlined experience, 
 Images soon, working on it.
 </details>
 
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fstellar-amenities%2Fhal-9100.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fstellar-amenities%2Fhal-9100?ref=badge_large)
